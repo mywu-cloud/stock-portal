@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1419">
+<title>PiNNCafe 股市</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f1419'/%3E%3Cpath d='M6 22l6-7 5 4 9-10' stroke='%23ef4444' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0f1419; --bar: #151b23; --line: #263040; --text: #d8dee9; --muted: #8592a6;
+    --accent: #ef4444; --hover: #1d2530; --h: 48px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; }
+  body { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+
+  header { flex: 0 0 var(--h); display: flex; align-items: stretch; gap: 8px;
+    background: var(--bar); border-bottom: 1px solid var(--line); padding: 0 8px 0 12px;
+    padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(8px, env(safe-area-inset-right)); }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; white-space: nowrap; color: var(--text); text-decoration: none; }
+  .brand svg { width: 22px; height: 22px; }
+  .brand span { font-size: 15px; }
+
+  nav { flex: 1 1 auto; display: flex; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  nav::-webkit-scrollbar { display: none; }
+  nav button { flex: 0 0 auto; appearance: none; border: 0; background: none; color: var(--muted);
+    font: inherit; padding: 0 14px; cursor: pointer; position: relative; white-space: nowrap; }
+  nav button:hover { color: var(--text); background: var(--hover); }
+  nav button[aria-selected="true"] { color: #fff; font-weight: 600; }
+  nav button[aria-selected="true"]::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 0;
+    height: 3px; border-radius: 3px 3px 0 0; background: var(--accent); }
+  nav button:focus-visible, .actions button:focus-visible, .actions a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .actions { display: flex; align-items: center; gap: 2px; }
+  .actions button, .actions a { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 6px;
+    background: none; color: var(--muted); cursor: pointer; }
+  .actions button:hover, .actions a:hover { background: var(--hover); color: var(--text); }
+  .actions svg { width: 18px; height: 18px; }
+  .note { color: var(--muted); font-size: 11px; white-space: nowrap; padding: 0 6px; }
+
+  main { flex: 1 1 auto; position: relative; }
+  main iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--bg); display: none; }
+  main iframe.on { display: block; }
+  .loading { position: absolute; top: 0; left: 0; height: 2px; background: var(--accent); width: 0; opacity: 0;
+    transition: width 1.2s ease, opacity .3s; z-index: 2; }
+  .loading.run { opacity: 1; width: 80%; }
+  .loading.done { opacity: 0; width: 100%; transition: width .2s, opacity .4s .2s; }
+
+  @media (max-width: 900px) { .note { display: none; } }
+  @media (max-width: 600px) {
+    :root { --h: 44px; }
+    .brand span { display: none; }
+    nav button { padding: 0 11px; font-size: 13px; }
+    .actions button.reload { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="#" title="PiNNCafe 股市">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#1d2530"/><path d="M6 22l6-7 5 4 9-10" stroke="#ef4444" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>PiNNCafe 股市</span>
+  </a>
+  <nav id="tabs" role="tablist" aria-label="股市工具"></nav>
+  <div class="actions">
+    <span class="note">資料僅供參考，不構成投資建議</span>
+    <button class="reload" id="reload" title="重新整理此分頁 (R)" aria-label="重新整理">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+    </button>
+    <a id="open" target="_blank" rel="noopener" title="在新視窗開啟" aria-label="在新視窗開啟">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>
+    </a>
+  </div>
+</header>
+<main id="stage"><div class="loading" id="bar"></div></main>
+
+<script src="tabs.js"></script>
+<script>
+(() => {
+  const TABS = window.STOCK_TABS || [];
+  const nav = document.getElementById("tabs");
+  const stage = document.getElementById("stage");
+  const bar = document.getElementById("bar");
+  const openLink = document.getElementById("open");
+  const frames = {};          // 已載入的 iframe（切換時保留狀態，不重新載入）
+  let current = null;
+  const KEY = "pinncafe-stock-tab";
+  const store = {
+    get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } },
+    set(v) { try { localStorage.setItem(KEY, v); } catch (e) {} },
+  };
+
+  TABS.forEach((t, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.setAttribute("role", "tab"); b.id = "tab-" + t.id;
+    b.textContent = t.label; b.title = t.label + (i < 9 ? `（Alt+${i + 1}）` : "");
+    b.setAttribute("aria-selected", "false");
+    b.addEventListener("click", () => go(t.id));
+    nav.appendChild(b);
+  });
+
+  function loading(on) {
+    bar.classList.remove("run", "done"); void bar.offsetWidth;
+    bar.classList.add(on ? "run" : "done");
+  }
+
+  function frameFor(t) {
+    if (frames[t.id]) return frames[t.id];
+    const f = document.createElement("iframe");
+    f.title = t.label;
+    f.allow = "clipboard-read; clipboard-write; fullscreen";
+    f.referrerPolicy = "strict-origin-when-cross-origin";
+    f.addEventListener("load", () => { if (current === t.id) loading(false); });
+    f.src = t.url;
+    stage.appendChild(f);
+    loading(true);
+    return (frames[t.id] = f);
+  }
+
+  function go(id, push = true) {
+    const t = TABS.find(x => x.id === id) || TABS[0];
+    if (!t) return;
+    current = t.id;
+    const f = frameFor(t);
+    Object.values(frames).forEach(x => x.classList.toggle("on", x === f));
+    nav.querySelectorAll("button").forEach(b => {
+      const on = b.id === "tab-" + t.id;
+      b.setAttribute("aria-selected", on);
+      if (on) b.scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
+    openLink.href = t.url;
+    document.title = t.label + "｜PiNNCafe 股市";
+    store.set(t.id);
+    if (push && location.hash.slice(1) !== t.id) history.replaceState(null, "", "#" + t.id);
+  }
+
+  document.getElementById("reload").addEventListener("click", () => {
+    const t = TABS.find(x => x.id === current); const f = frames[current];
+    if (t && f) { loading(true); f.src = t.url; }
+  });
+
+  window.addEventListener("hashchange", () => go(location.hash.slice(1), false));
+  window.addEventListener("keydown", e => {
+    if (e.altKey && /^[1-9]$/.test(e.key) && TABS[e.key - 1]) { e.preventDefault(); go(TABS[e.key - 1].id); }
+  });
+
+  go(location.hash.slice(1) || store.get() || (TABS[0] && TABS[0].id));
+})();
+</script>
+</body>
+</html>
