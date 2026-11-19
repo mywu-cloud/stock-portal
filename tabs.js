@@ -11,6 +11,7 @@ window.STOCK_TABS = [
   { id: "msh",     label: "大股東籌碼", url: "https://majorsh.pages.dev/top-changes/",      repo: "mywu-cloud/msh" },
   { id: "finrev",  label: "月營收",     url: "https://finrev.pages.dev/",                   repo: "mywu-cloud/finrev" },
   { id: "fineps",  label: "EPS 排行",   url: "https://fineps.pages.dev/",                   repo: "mywu-cloud/fineps" },
+  { id: "twai",    label: "AI科技財報", url: "https://tw-ai.pages.dev/",                    repo: "mywu-cloud/TW-AI" },
   { id: "fxremit", label: "外資匯出入", url: "https://fxremit.pages.dev/",                  repo: "mywu-cloud/FxRemit" },
   { id: "etf",     label: "ETF 持股",   url: "https://etf-2xx.pages.dev/",                  repo: "mywu-cloud/ETF" },
 ];
