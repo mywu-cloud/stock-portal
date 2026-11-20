@@ -13,13 +13,14 @@
 | AI科技財報 | tw-ai.pages.dev | TW-AI |
 | 外資匯出入 | fxremit.pages.dev | FxRemit |
 | ETF 持股 | etf-2xx.pages.dev | ETF |
+| 美股財報 | ustech.pages.dev | ustech |
 
 ## 修改分頁
 只改 `tabs.js`（名稱、順序、網址）。push 後 Cloudflare Pages 自動部署。
 
 ## 使用
 - `stock.pinncafe.com/#nettrade` 直接開指定分頁；未指定時回到上次分頁
-- Alt+1…9 切換分頁；右上角可重新整理或在新視窗開啟
+- Alt+1…9 切換前 9 個分頁（第 10 個以後請點選）；右上角可重新整理或在新視窗開啟
 - 分頁切換時保留各站狀態（不重新載入）
 
 ## 部署（Cloudflare Pages）

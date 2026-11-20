@@ -14,4 +14,5 @@ window.STOCK_TABS = [
   { id: "twai",    label: "AI科技財報", url: "https://tw-ai.pages.dev/",                    repo: "mywu-cloud/TW-AI" },
   { id: "fxremit", label: "外資匯出入", url: "https://fxremit.pages.dev/",                  repo: "mywu-cloud/FxRemit" },
   { id: "etf",     label: "ETF 持股",   url: "https://etf-2xx.pages.dev/",                  repo: "mywu-cloud/ETF" },
+  { id: "ustech",  label: "美股財報",   url: "https://ustech.pages.dev/",                   repo: "mywu-cloud/ustech" },
 ];
